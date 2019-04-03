@@ -1,2 +1,56 @@
-public class DecisionTree {
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+
+/**
+ * Represents a decision tree on a given collection of data, for classification.
+ * @param <T> The type of the output variable (class/category) of the Record's'
+ * of this DecisionTree.
+ */
+public class DecisionTree<T> {
+
+    /**
+     * The root Node of this DecisionTree.
+     */
+    private Node<T> root;
+
+    /**
+     * Creates a decision tree on a given collection of data. After this
+     * constructor ends, the tree is trained, and ready to receive queries.
+     * @param records A Collection with all the training data, to construct this
+     * Decision Tree.
+     * @param minNodeCapacity The minimum number of Record's' a Node of this
+     * DecisionTree can have.
+     * @throws IllegalArgumentException If records.isEmpty() == true.
+     * @throws IllegalArgumentException If minNodeCapacity < 0.
+     * @throws IllegalArgumentException If records.size() < minNodeCapacity.
+     */
+    public DecisionTree(@NotNull Collection<Record<T>> records,
+                        int minNodeCapacity) {
+        //Validates that records Collection contains at least 1 element
+        if (records.isEmpty()) {
+            throw new IllegalArgumentException("Argument records Collection " +
+                    "must contain at least 1 element.");
+        }//end if
+
+        //Validates that minNodeCapacity >= 0
+        if (minNodeCapacity < 0) {
+            throw new IllegalArgumentException("Argument minNodeCapacity " +
+                    "must be >= 0.");
+        }//end if
+
+        //Validates that records.size() >= minNodeCapacity
+        if (records.size() < minNodeCapacity) {
+            throw new IllegalArgumentException("Argument records Collection " +
+                    "must have a size of at least minNodeCapacity.");
+        }//end if
+    }
+
+    /**
+     * Predicts/Classifies the output value of a given record.
+     * @param record A record to predict its output value.
+     * @return The predicted output value of the given Record.
+     */
+    public @NotNull T predict(@NotNull Record<T> record) {}
+
 }//end class DecisionTree
