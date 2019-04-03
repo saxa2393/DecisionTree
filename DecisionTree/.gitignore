@@ -25,4 +25,5 @@ hs_err_pid*
 /.idea
 /out
 *.iml
+DecisionTree.iml
 README.md
