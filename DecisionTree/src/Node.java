@@ -1,7 +1,11 @@
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Represents a Node in a DecisionTree.
@@ -9,6 +13,12 @@ import java.util.Map;
  * of this Node.
  */
 public class Node<T> {
+
+    /**
+     * The title of the Feature this Node branches based on. Contains null if
+     * this Node is a leaf Node.
+     */
+    private String featureTitle;
 
     /**
      * A Table with all the Record's' of this Node.
@@ -20,7 +30,7 @@ public class Node<T> {
      * its .equals() method polymorphically, and the value is the child Node to
      * branch to.
      */
-    private Map<Object, Node> childNodes = new HashMap<>();
+    private Map<Object, Node<T>> childNodes = new HashMap<>();
 
     /**
      * Maps a given key to a child Node.
@@ -33,14 +43,13 @@ public class Node<T> {
     }
 
     /**
-     * Gets the child Node of this Node, given a key.
+     * Gets a child Node of this Node, given a key.
      * @param key The key of the child Node to branch to.
      * @return The child Node to branch to.
      * @throws IllegalStateException If this Node is a leaf node.
      * @throws IllegalArgumentException If key has no mapping to a child Node.
      */
-    public @NotNull
-    Node branch(@NotNull Object key) {
+    public @NotNull Node<T> branch(@NotNull Object key) {
         //Validates that this Node is not a leaf node
         if (this.isLeaf()) {
             throw new IllegalStateException("This Node is a leaf node, and " +
@@ -48,7 +57,7 @@ public class Node<T> {
         }//end if
 
         //Gets the child Node mapping of key
-        Node child = this.childNodes.get(key);
+        Node<T> child = this.childNodes.get(key);
         //Validates that key has a mapping to a child Node
         if (null == child) {
             throw new IllegalArgumentException("Argument key has no mapping " +
@@ -64,6 +73,35 @@ public class Node<T> {
      */
     public boolean isLeaf() {
         return this.childNodes.isEmpty();
+    }
+
+    /**
+     * Gets the title of the Feature this Node branches based on.
+     * @return The title of the Feature this Node branches based on, or null if
+     * this Node is a leaf node.
+     */
+    public @Nullable String getFtrTitle() {
+        return this.featureTitle;
+    }
+
+    /**
+     * Finds the dominant (most frequent) target value of the Table of this
+     * Node. Breaks ties arbitrary.
+     * @return The dominant (most frequent) target value of the Table of this
+     * Node or an arbitrary one, if there are more than 1 with the same
+     * frequency.
+     */
+    public @NotNull T dominantTarget() {
+        return this.table.getRecords()
+                         .parallelStream()
+                         .map(Record::getTarget)
+                         .collect(Collectors.groupingBy(Function.identity(),
+                                 Collectors.counting()))
+                         .entrySet()
+                         .parallelStream()
+                         .max(Comparator.comparing(Map.Entry::getValue))
+                         .get()
+                         .getKey();
     }
 
 }//end class Node
