@@ -51,6 +51,19 @@ public class DecisionTree<T> {
      * @param record A record to predict its output value.
      * @return The predicted output value of the given Record.
      */
-    public @NotNull T predict(@NotNull Record<T> record) {}
+    public @NotNull T predict(@NotNull Record<T> record) {
+        //The next Node to branch to
+        Node<T> nextNode = this.root;
+        //Follows a path of Nodes, until it reaches a leaf Node
+        while (!nextNode.isLeaf()) {
+            //Gets the value of the examined Feature in nextNode, of record
+            Object value = record.getFeatures().get(nextNode.getFtrTitle());
+            //Branches to the next Node, based on the value of the given Record
+            //on the Feature examined by nextNode
+            nextNode = nextNode.branch(value);
+        }//end while
+
+        return nextNode.dominantTarget();
+    }
 
 }//end class DecisionTree
