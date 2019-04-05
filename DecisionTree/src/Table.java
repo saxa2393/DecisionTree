@@ -70,8 +70,40 @@ public class Table<T> {
         return this.records
                    .parallelStream()
                    .map(r -> r.getFeatures().get(ftrTitle).getData())
-                   .filter(v -> v.equals(value))
+                   .filter(e -> e.equals(value))
                    .count();
+    }
+
+    /**
+     * Calculates the entropy of this Table, for the target value of its
+     * Records.
+     * @return The entropy of this Table, for the target value of its Records.
+     */
+    public double entropy() {
+        //The entropy of this Table, for the target values
+        double entropy = 0.0;
+        //A Set with all the target values of this Table
+        Set<?> targetValues = this.records
+                                  .parallelStream()
+                                  .map(Record::getTarget)
+                                  .collect(Collectors.toSet());
+
+        //Calculates the entropy
+        for (Object v : targetValues) {
+            //Calculates the frequency target value v in the Record's' of this
+            //Table
+            long freq = this.records
+                            .parallelStream()
+                            .map(Record::getTarget)
+                            .filter(e -> e.equals(v))
+                            .count();
+            //Calculates the relative frequency of v
+            double relFreq = (double) freq / targetValues.size();
+            //Subtracts the term of value v in the entropy
+            entropy -= relFreq * (Math.log(relFreq) / Math.log(2.0));
+        }//end for
+
+        return entropy;
     }
 
 }//end class Table
