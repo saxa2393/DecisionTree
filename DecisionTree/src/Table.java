@@ -27,7 +27,7 @@ public class Table<T> {
             //Checks if Record r has no target value
             if (r.getTarget() == null) {
                 throw new IllegalArgumentException("All the Record's' in " +
-                        "List records must contain a nun-null target value.");
+                        "List records must contain a non-null target value.");
             }//end if
         }//end for
 
