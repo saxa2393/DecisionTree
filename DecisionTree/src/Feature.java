@@ -14,7 +14,7 @@ public class Feature<T extends Comparable<T>> {
     /**
      * The data of this Feature.
      */
-    private T DATA;
+    private final T DATA;
 
     /**
      * Creates a Feature, given its title and data.
