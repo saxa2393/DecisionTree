@@ -18,7 +18,7 @@ public class DecisionTree<T> {
      * Creates a decision tree on a given collection of data. After this
      * constructor ends, the tree is trained, and ready to receive queries.
      * @param records A Collection with all the training data, to construct this
-     * Decision Tree.
+     * Decision Tree. All the given Record's' must have a non-null target value.
      * @param minNodeCapacity The minimum number of Record's' a Node of this
      * DecisionTree can have.
      * @throws IllegalArgumentException If records.isEmpty() == true.
@@ -26,7 +26,7 @@ public class DecisionTree<T> {
      * @throws IllegalArgumentException If records.size() < minNodeCapacity.
      */
     public DecisionTree(@NotNull Collection<Record<T>> records,
-                        int minNodeCapacity) {
+            int minNodeCapacity) {
         //Validates that records Collection contains at least 1 element
         if (records.isEmpty()) {
             throw new IllegalArgumentException("Argument records Collection " +
