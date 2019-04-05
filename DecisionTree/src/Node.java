@@ -45,26 +45,11 @@ public class Node<T> {
     /**
      * Gets a child Node of this Node, given a key.
      * @param key The key of the child Node to branch to.
-     * @return The child Node to branch to.
-     * @throws IllegalStateException If this Node is a leaf node.
-     * @throws IllegalArgumentException If key has no mapping to a child Node.
+     * @return The child Node to branch to, or null if there is no mapping for
+     * to a child Node for the given key.
      */
-    public @NotNull Node<T> branch(@NotNull Object key) {
-        //Validates that this Node is not a leaf node
-        if (this.isLeaf()) {
-            throw new IllegalStateException("This Node is a leaf node, and " +
-                    "contains no child Nodes.");
-        }//end if
-
-        //Gets the child Node mapping of key
-        Node<T> child = this.childNodes.get(key);
-        //Validates that key has a mapping to a child Node
-        if (null == child) {
-            throw new IllegalArgumentException("Argument key has no mapping " +
-                    "to a child Node.");
-        }//end if
-
-        return child;
+    public @Nullable Node<T> branch(@NotNull Object key) {
+        return this.childNodes.get(key);
     }
 
     /**
