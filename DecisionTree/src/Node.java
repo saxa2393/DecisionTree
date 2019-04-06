@@ -37,7 +37,7 @@ public class Node<T> {
      * @param key The key of the child Node.
      * @param child The child Node of this Node.
      */
-    public void addChild(@NotNull Object key, @NotNull Node child) {
+    public void addChild(@NotNull Object key, @NotNull Node<T> child) {
         //Puts child in the childNodes Maps with key as its key
         this.childNodes.put(key, child);
     }
