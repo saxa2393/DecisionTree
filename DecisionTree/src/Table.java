@@ -1,6 +1,7 @@
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -84,24 +85,20 @@ public class Table<T> {
     public double entropy() {
         //The entropy of this Table, for the target values
         double entropy = 0.0;
-        //A Set with all the target values of this Table
-        Set<?> targetValues = this.records
-                                  .parallelStream()
-                                  .map(Record::getTarget)
-                                  .collect(Collectors.toSet());
+        //A Map with all the unique values of the target variable of the
+        //Record's' of this Table as its keys and their frequency as its values
+        Map<?, Long> valFreq = this.records
+                                   .parallelStream()
+                                   .map(Record::getTarget)
+                                   .collect(Collectors.groupingBy(
+                                           Function.identity(),
+                                           Collectors.counting()));
 
         //Calculates the entropy
-        for (Object v : targetValues) {
-            //Calculates the frequency target value v in the Record's' of this
-            //Table
-            long freq = this.records
-                            .parallelStream()
-                            .map(Record::getTarget)
-                            .filter(e -> e.equals(v))
-                            .count();
-            //Calculates the relative frequency of v
-            double relFreq = (double) freq / targetValues.size();
-            //Subtracts the term of value v from the entropy
+        for (Map.Entry<?, Long> e : valFreq.entrySet()) {
+            //Calculates the relative frequency of the current value
+            double relFreq = (double) e.getValue() / valFreq.size();
+            //Subtracts the term of the current value from the entropy
             entropy -= relFreq * (Math.log(relFreq) / Math.log(2.0));
         }//end for
 
