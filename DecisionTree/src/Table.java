@@ -51,6 +51,7 @@ public class Table<T> {
      * this Table.
      */
     public @NotNull Set<?> ftrValues(@NotNull String ftrTitle) {
+        //FIXME Supports only discrete values
         return this.records
                    .parallelStream()
                    .map(r -> r.getFeatures().get(ftrTitle).getData())
@@ -67,6 +68,7 @@ public class Table<T> {
      * does not belong in the value set of the given Feature, returns 0.
      */
     public long ftrValueFreq(@NotNull String ftrTitle, @NotNull Object value) {
+        //FIXME Supports only discrete values
         return this.records
                    .parallelStream()
                    .map(r -> r.getFeatures().get(ftrTitle).getData())
@@ -99,7 +101,7 @@ public class Table<T> {
                             .count();
             //Calculates the relative frequency of v
             double relFreq = (double) freq / targetValues.size();
-            //Subtracts the term of value v in the entropy
+            //Subtracts the term of value v from the entropy
             entropy -= relFreq * (Math.log(relFreq) / Math.log(2.0));
         }//end for
 
