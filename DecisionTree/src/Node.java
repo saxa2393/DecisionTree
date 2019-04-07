@@ -49,13 +49,30 @@ public class Node<T> {
     }
 
     /**
-     * Gets a child Node of this Node, given a key.
-     * @param key The key of the child Node to branch to.
+     * Gets a child Node of this Node, given a value.
+     * @param value The value of a Record, of the branching Feature of this
+     * Node, in order to branch to the proper child Node.
      * @return The child Node to branch to, or null if there is no mapping for
-     * to a child Node for the given key.
+     * to a child Node for the given value.
      */
-    public @Nullable Node<T> branch(@NotNull Object key) {
-        return this.childNodes.get(key);
+    public @Nullable Node<T> branch(@NotNull Comparable value) {
+        //Gets the Range's' of the branching Feature of this Node
+        Set<SemiRange<?>> ranges = this.table.getRanges().get(
+                this.featureTitle);
+        //Checks if the branching Feature contains continuous values
+        if (ranges != null) {
+            //Finds the SemiRange that contains the given value
+            for (SemiRange sr : ranges) {
+                //Checks if sr contains value
+                if (sr.contains(value)) {
+                    return this.childNodes.get(sr);
+                }//end if
+            }//end for
+
+            return null;
+        }//end if
+
+        return this.childNodes.get(value);
     }
 
     /**
