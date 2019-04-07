@@ -56,6 +56,14 @@ public class SemiRange<T extends Comparable<T>> extends Range<T> {
         return this.isBoundLow == this.bound.compareTo(value) < 0;
     }
 
+    /**
+     * Indicates if the bound of this SemiRange is included.
+     * @return True if the bound of this SemiRange is included, otherwise false.
+     */
+    public boolean isBoundInc() {
+        return this.isBoundInc;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
