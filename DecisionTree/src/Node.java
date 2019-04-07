@@ -1,9 +1,7 @@
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,6 +29,14 @@ public class Node<T> {
      * branch to.
      */
     private Map<Object, Node<T>> childNodes = new HashMap<>();
+
+    /**
+     * Creates a Node, given its Table.
+     * @param table The Table with all the Record's' of this Node.
+     */
+    public Node(@NotNull Table<T> table) {
+        this.table = table;
+    }
 
     /**
      * Maps a given key to a child Node.
@@ -87,6 +93,59 @@ public class Node<T> {
                          .max(Comparator.comparing(Map.Entry::getValue))
                          .get()
                          .getKey();
+    }
+
+    /**
+     * Gets a Collection with all the child Nodes of this node.
+     * @return An unmodifiable Collection with all the child Nodes of this node.
+     */
+    public @NotNull Collection<Node<T>> getChildNodes() {
+        return Collections.unmodifiableCollection(this.childNodes.values());
+    }
+
+    /**
+     * Gets the number of Record's' the Table of this Node has.
+     * @return How many Record's' the Table of this Node has.
+     */
+    public int tableSize() {
+        return this.table.getRecords().size();
+    }
+
+    /**
+     * Splits this Node, based on a Feature that will give the maximum
+     * information gain. After that, automatically splits its child Node's' too.
+     * If this Node is already split, this method does nothing.
+     * @param minCapacity The minimum number of Record's' a Node must have,
+     * after a split.
+     */
+    public void split(final int minCapacity) {
+        //Checks if this Node is already split
+        if (this.featureTitle != null) {
+            return;
+        }//end if
+
+        //Checks if this Node does not have the minimum number of Record's'
+        //required for the split to take place
+        if (this.tableSize() < minCapacity) {
+            return;
+        }//end if
+
+        //Gets the title of the optimal Feature, for splitting this Node
+        String optFtrTitle = this.table.optimalFeature();
+        //The split Tables of this Node on the optimal Feature
+        Map<Object, Table<T>> splitTables = this.table.split(optFtrTitle,
+                minCapacity);
+        //Populates this.childNodes Map
+        for (Map.Entry<Object, Table<T>> e : splitTables.entrySet()) {
+            //Adds a new child Node in this Node
+            this.childNodes.put(e.getKey(), new Node<>(e.getValue()));
+        }//end for
+
+        //Splits the child Node's' on their optimal Feature
+        for (Map.Entry<Object, Node<T>> e : this.childNodes.entrySet()) {
+            //Splits the current child Node on its optimal Feature
+            e.getValue().split(minCapacity);
+        }//end for
     }
 
 }//end class Node
