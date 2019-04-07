@@ -21,6 +21,8 @@ public class DecisionTree<T> {
      * classification queries.
      * @param records A Collection with all the training data, to construct this
      * DecisionTree. All the given Record's' must have a non-null target value.
+     * All the given data in case of String's' or Char's', are case sensitive,
+     * i.e. "path", "PATH", "pAtH" are all considered different values.
      * @param minNodeCapacity The minimum number of Record's' a Node of this
      * DecisionTree can have.
      * @throws IllegalArgumentException If records.isEmpty() == true.
