@@ -16,24 +16,101 @@ public class Table<T> {
     private List<Record<T>> records;
 
     /**
-     * Creates a Table, given its Record's'.
-     * @param records The Record's' of this Table.
-     * @throws IllegalArgumentException If there is at least 1 Record in records
-     * Collection with a null target value.
+     * A Map with keys the title of a Feature and values a Set with the FiniteRange's'
+     * of that Feature column. It is used on the Features with continuous data.
      */
-    public Table(@NotNull Collection<Record<T>> records) {
-        //Validates that all the Record's' in records Collection have non-null
-        //target value
+    private Map<String, Set<SemiRange<?>>> ranges;
+
+    /**
+     * Creates a Table, given its Record's'.
+     * @param records The Record's' of this Table. All the Record's' must be
+     * consistent with each other, in the sense, that all of them must contain
+     * the same semantic Features. This constructor will not verify that, for
+     * performance reasons. If the given Record's' have that inconsistency, this
+     * instance will have undefined behavior and state.
+     * @throws IllegalArgumentException If the records.isEmpty() == true.
+     * @throws IllegalArgumentException If there is at least 1 Record in records
+     * List with a null target value.
+     */
+    public Table(@NotNull List<Record<T>> records) {
+        //Validates that there is at least 1 element in records List
+        if (records.isEmpty()) {
+            throw new IllegalArgumentException("Argument List records must " +
+                    "contain at least 1 element.");
+        }//end if
+
+        //Validates that all the Record's' in records List have non-null target
+        //value
         for (Record<T> r : records) {
             //Checks if Record r has no target value
             if (r.getTarget() == null) {
                 throw new IllegalArgumentException("All the Record's' in " +
-                        "Collection records must contain a non-null target " +
-                        "value.");
+                        "List records must contain a non-null target value.");
             }//end if
         }//end for
 
-        this.records = new ArrayList<>(records);
+        //A Map with keys the title of a Feature and values a Set with the
+        //SemiRange's' of that Feature column.
+        Map<String, Set<SemiRange<?>>> ranges = new HashMap<>();
+        //Gets the 1st Record from Records List
+        Record<T> templateRecord = records.get(0);
+        //A Map with the Feature's' of the Record's' as values, and their titles
+        //as keys
+        Map<String, Feature<?>> features = templateRecord.getFeatures();
+        //Loops through all the Feature's' of the Records, to find the ones with
+        //continuous data type
+        for (Map.Entry<String, Feature<?>> e : features.entrySet()) {
+            //Checks if the current Feature doesn't have continuous data type
+            if (!e.getValue().getType().equals(Feature.Type.CONTINUOUS)) {
+                continue;
+            }//end if
+
+            //A List with the data of the current Feature, from all the
+            //Record's'
+            List<Comparable<?>> data = records.parallelStream()
+                                              .map(r -> r.getFeatures()
+                                                         .get(e.getKey())
+                                                         .getData())
+                                              .collect(Collectors.toList());
+            //Shuffles data List, to minimize the chance for the O(n * log2(n))
+            //worst case time, for finding its median with a PriorityQueue
+            Collections.shuffle(data);
+            //Creates a PriorityQueue with the first (records.size() + 2) / 2
+            //elements from data List, to find its median in Θ(n) average time.
+            //The generics are dropped here, as it is impossible for the
+            //compiler to tell if the capture<?> in comparing 2 Comparable<?> is
+            //the same
+            PriorityQueue<Comparable> pq = new PriorityQueue<>(data.subList(
+                    0, (data.size() + 2) / 2));
+            //Finds the (records.size() + 2) / 2 largest elements of data List,
+            //in pq PriorityQueue
+            for (Comparable d : data.subList((data.size() + 2) / 2,
+                    data.size())) {
+                //Checks if d is larger than the smallest element in pq
+                if (pq.element().compareTo(d) < 0) {
+                    //Removes the head (smallest element) of pq (min heap)
+                    pq.remove();
+                    //Adds d in pq
+                    pq.add(d);
+                }//end if
+            }//end for
+
+            //Gets the median of data List
+            Comparable<?> median = pq.element();
+            //Partitions the continuous values of the current Feature into 2
+            //SemiRange's'. The generics at instantiation are dropped, as the
+            //compiler cannot infer them, because of the capture<?>
+            SemiRange<?> lowRange = new SemiRange(median, false,
+                    true);
+            SemiRange<?> highRange = new SemiRange(median, true,
+                    false);
+            //Puts them in ranges Map, keyed by the title of the current Feature
+            ranges.put(e.getKey(), new HashSet(Arrays.asList(lowRange,
+                    highRange)));
+        }//end for
+
+        this.records = records;
+        this.ranges = ranges;
     }
 
     /**
