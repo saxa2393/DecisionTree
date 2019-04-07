@@ -171,8 +171,11 @@ public class Table<T> {
             SemiRange range = null;
             //Iterates over ranges to find the one that contains value
             for (SemiRange r : ranges) {
+                //Checks if r contains value
                 if (r.contains(value)) {
+                    //Store a reference to r
                     range = r;
+                    //No need to continue iteration
                     break;
                 }//end if
             }//end for
