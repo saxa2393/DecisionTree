@@ -120,7 +120,7 @@ public class Node<T> {
      */
     public void split(final int minCapacity) {
         //Checks if this Node is already split
-        if (this.featureTitle != null) {
+        if (!this.childNodes.isEmpty()) {
             return;
         }//end if
 
@@ -135,11 +135,22 @@ public class Node<T> {
         //The split Tables of this Node on the optimal Feature
         Map<Object, Table<T>> splitTables = this.table.split(optFtrTitle,
                 minCapacity);
+
+        //Checks if splitTables contains less than 2 elements
+        if (splitTables.size() < 2) {
+            return;
+        }//end if
+
+        System.out.println(this.tableSize());
+
         //Populates this.childNodes Map
         for (Map.Entry<Object, Table<T>> e : splitTables.entrySet()) {
             //Adds a new child Node in this Node
             this.childNodes.put(e.getKey(), new Node<>(e.getValue()));
         }//end for
+
+        //Sets the title of the Feature this Node examines
+        this.featureTitle = optFtrTitle;
 
         //Splits the child Node's' on their optimal Feature
         for (Map.Entry<Object, Node<T>> e : this.childNodes.entrySet()) {
