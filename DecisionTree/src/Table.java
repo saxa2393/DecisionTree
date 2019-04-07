@@ -1,8 +1,13 @@
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a list of Record's' that all have a non-null target value.
@@ -23,6 +28,32 @@ public class Table<T> {
     private Map<String, Set<SemiRange<?>>> ranges;
 
     /**
+     * Calculates the entropy of the target variable of a Stream of Records.
+     * @return The entropy of the target variable of a Stream of Records.
+     */
+    private static <T> double entropy(@NotNull Stream<Record<T>> records) {
+        //The entropy of this Table, for the target values
+        double entropy = 0.0;
+        //A Map with all the unique values of the target variable of the
+        //Record's' of records Stream as its keys and their frequency as its
+        //values
+        Map<?, Long> valFreq = records.map(Record::getTarget)
+                                      .collect(Collectors.groupingBy(
+                                              Function.identity(),
+                                              Collectors.counting()));
+
+        //Calculates the entropy
+        for (Map.Entry<?, Long> e : valFreq.entrySet()) {
+            //Calculates the relative frequency of the current value
+            double relFreq = (double) e.getValue() / valFreq.size();
+            //Subtracts the term of the current value from the entropy
+            entropy -= relFreq * (Math.log(relFreq) / Math.log(2.0));
+        }//end for
+
+        return entropy;
+    }
+
+    /**
      * Creates a Table, given its Record's'.
      * @param records The Record's' of this Table. All the Record's' must be
      * consistent with each other, in the sense, that all of them must contain
@@ -31,30 +62,33 @@ public class Table<T> {
      * instance will have undefined behavior and state.
      * @throws IllegalArgumentException If the records.isEmpty() == true.
      * @throws IllegalArgumentException If there is at least 1 Record in records
-     * List with a null target value.
+     * Collection with a null target value.
      */
-    public Table(@NotNull List<Record<T>> records) {
-        //Validates that there is at least 1 element in records List
+    public Table(@NotNull Collection<Record<T>> records) {
+        //Validates that there is at least 1 element in records Collection
         if (records.isEmpty()) {
-            throw new IllegalArgumentException("Argument List records must " +
-                    "contain at least 1 element.");
+            throw new IllegalArgumentException("Argument Collection records " +
+                    "must contain at least 1 element.");
         }//end if
 
-        //Validates that all the Record's' in records List have non-null target
-        //value
+        //Validates that all the Record's' in records Collection have non-null
+        //target value
         for (Record<T> r : records) {
             //Checks if Record r has no target value
             if (r.getTarget() == null) {
                 throw new IllegalArgumentException("All the Record's' in " +
-                        "List records must contain a non-null target value.");
+                        "Collection records must contain a non-null target " +
+                        "value.");
             }//end if
         }//end for
 
         //A Map with keys the title of a Feature and values a Set with the
         //SemiRange's' of that Feature column.
         Map<String, Set<SemiRange<?>>> ranges = new HashMap<>();
-        //Gets the 1st Record from Records List
-        Record<T> templateRecord = records.get(0);
+        //Gets a Record from Records Collection
+        Record<T> templateRecord = records.stream()
+                                          .findAny()
+                                          .get();
         //A Map with the Feature's' of the Record's' as values, and their titles
         //as keys
         Map<String, Feature<?>> features = templateRecord.getFeatures();
@@ -110,7 +144,7 @@ public class Table<T> {
                     highRange)));
         }//end for
 
-        this.records = records;
+        this.records = new ArrayList<>(records);
         this.ranges = ranges;
     }
 
@@ -129,6 +163,50 @@ public class Table<T> {
      */
     public @NotNull Map<String, Set<SemiRange<?>>> getRanges() {
         return Collections.unmodifiableMap(this.ranges);
+    }
+
+    /**
+     * Finds the optimal Feature to split this Table.
+     * @return The title of the optimal Feature to split this Table.
+     */
+    public @NotNull String optimalFeature() {
+        /**
+         * Represents a tuple of 2 objects.
+         */
+        class Tuple<A, R> {
+
+            /**
+             * The 1st object of this Tuple.
+             */
+            private A a;
+
+            /**
+             * The 2nd object of this Tuple.
+             */
+            private R b;
+
+            /**
+             * Creates a Tuple given its 2 objects.
+             * @param a The 1st object of this Tuple.
+             * @param b The 2nd object of this Tuple.
+             */
+            private Tuple(A a, R b) {
+                this.a = a;
+                this.b = b;
+            }
+
+        }//end local class Tuple
+
+        //A template Record to obtain the Feature's' of this Table
+        Record<T> templateRecord = this.records.get(0);
+        return templateRecord.getFeatures()
+                             .entrySet()
+                             .parallelStream()
+                             .map(e -> new Tuple<>(e.getKey(),
+                                     this.infoGain(e.getKey())))
+                             .max(Comparator.comparing(x -> x.b))
+                             .get()
+                             .a;
     }
 
     /**
@@ -153,6 +231,79 @@ public class Table<T> {
     }
 
     /**
+     * Splits this Table on a given Feature.
+     * @param ftrTitle The title of the Feature to split this Table, based on.
+     * @param minCapacity The minimum number of Record's' a Table must have,
+     * after a split.
+     * @return A Map with keys the splitting values of the Table, and values the
+     * new split Tables.
+     */
+    public @NotNull Map<Object, Table<T>> split(@NotNull String ftrTitle,
+            final int minCapacity) {
+        //Checks if this Table does not have the minimum number of Record's'
+        //required for the split to take place
+        if (this.records.size() < minCapacity) {
+            return new LinkedHashMap<>();
+        }//end if
+
+        //Gets the Range's' of the given Feature
+        Set<SemiRange<?>> ranges = this.ranges.get(ftrTitle);
+        //Checks if the given Feature contains continuous values
+        if (ranges != null) {
+            //A Map with keys the splitting values of the Table, and values the
+            //new split Tables.
+            Map<Object, Table<T>> splitTables =
+                    new LinkedHashMap<>(2);
+            //Populates splitTables Map
+            for (SemiRange sr : ranges) {
+                //The split List with the Record's' with values in sr SemiRange
+                List<Record<T>> records = this.records
+                                              .parallelStream()
+                                              .filter(r -> sr.contains(
+                                                    r.getFeatures()
+                                                     .get(ftrTitle)
+                                                     .getData()))
+                                              .collect(Collectors.toList());
+                //Checks if records contains at least the minimum number of
+                //Record's'
+                if (records.size() < minCapacity) {
+                    continue;
+                }//end if
+
+                //Puts in splitTables Map the new Table
+                splitTables.put(sr, new Table<>(records));
+            }//end for
+
+            return splitTables;
+        }//end if
+
+        //A Map with keys the splitting values of the Table, and values the
+        //new split Tables.
+        Map<Object, Table<T>> splitTables = new LinkedHashMap<>();
+        //Populates splitTables Map
+        for (Object v : this.ftrValues(ftrTitle)) {
+            //The split List with the Record's' with values v
+            List<Record<T>> records = this.records
+                                          .parallelStream()
+                                          .filter(r -> v.equals(
+                                                  r.getFeatures()
+                                                   .get(ftrTitle)
+                                                   .getData()))
+                                          .collect(Collectors.toList());
+            //Checks if records contains at least the minimum number of
+            //Record's'
+            if (records.size() < minCapacity) {
+                continue;
+            }//end if
+
+            //Puts in splitTables Map the new Table
+            splitTables.put(v, new Table<>(records));
+        }//end for
+
+        return splitTables;
+    }
+
+    /**
      * Calculates the frequency of a given value of a Feature, in the Record's'
      * of this Table.
      * @param ftrTitle The title of the Feature the given value belongs to.
@@ -161,8 +312,8 @@ public class Table<T> {
      * this Table. If there are no Record's' with the given value, or the value
      * does not belong in the value set of the given Feature, returns 0.
      */
-    public long ftrValueFreq(@NotNull String ftrTitle,
-            @NotNull Comparable value) {
+    private long ftrValueFreq(@NotNull String ftrTitle,
+            @NotNull Object value) {
         //Gets the Range's' of the given Feature
         Set<SemiRange<?>> ranges = this.ranges.get(ftrTitle);
         //Checks if the given Feature contains continuous values
@@ -172,7 +323,7 @@ public class Table<T> {
             //Iterates over ranges to find the one that contains value
             for (SemiRange r : ranges) {
                 //Checks if r contains value
-                if (r.contains(value)) {
+                if (r.contains((Comparable) value)) {
                     //Store a reference to r
                     range = r;
                     //No need to continue iteration
@@ -192,31 +343,68 @@ public class Table<T> {
     }
 
     /**
-     * Calculates the entropy of this Table, for the target value of its
-     * Records.
-     * @return The entropy of this Table, for the target value of its Records.
+     * Calculates the information gain of splitting this Table by the given
+     * Feature.
+     * @param ftrTitle The title of the Feature to calculate its information
+     * gain on split.
+     * @return The information gain of splitting this Table by the given
+     * Feature.
      */
-    public double entropy() {
-        //The entropy of this Table, for the target values
-        double entropy = 0.0;
-        //A Map with all the unique values of the target variable of the
-        //Record's' of this Table as its keys and their frequency as its values
-        Map<?, Long> valFreq = this.records
-                                   .parallelStream()
-                                   .map(Record::getTarget)
-                                   .collect(Collectors.groupingBy(
-                                           Function.identity(),
-                                           Collectors.counting()));
+    private double infoGain(@NotNull String ftrTitle) {
+        //The entropy of this Table, for the target value of its Records.
+        double entropy = Table.entropy(this.records.parallelStream());
 
-        //Calculates the entropy
-        for (Map.Entry<?, Long> e : valFreq.entrySet()) {
-            //Calculates the relative frequency of the current value
-            double relFreq = (double) e.getValue() / valFreq.size();
-            //Subtracts the term of the current value from the entropy
-            entropy -= relFreq * (Math.log(relFreq) / Math.log(2.0));
+        //Gets the Range's' of the given Feature
+        Set<SemiRange<?>> ranges = this.ranges.get(ftrTitle);
+        //Checks if the given Feature contains continuous values
+        if (ranges != null) {
+            //The information gain of splitting
+            double infoGain = entropy;
+            //Calculates the information gain
+            for (SemiRange sr : ranges) {
+                //Calculates the relative frequency of the items that are
+                //contained in SemiRange sr
+                double relFreq = sr.isBoundInc() ? (this.records.size() + 2) /
+                        2.0 : this.records.size() - (this.records.size() + 2) /
+                        2.0;
+                //Subtracts the term of SemiRange sr from infoGain
+                infoGain -= relFreq * Table.entropy(
+                        this.records
+                            .parallelStream()
+                            .filter(r -> sr.contains(r.getFeatures()
+                                                      .get(ftrTitle)
+                                                      .getData())));
+            }//end for
+
+            return infoGain;
+        }//end if
+
+        //A Set with all the values of the given Feature, in the Record's' of
+        //this Table.
+        Set<?> ftrValues = this.ftrValues(ftrTitle);
+        //A Map with the the entropy of this Table, on its target variable, if
+        //split by each value in ftrValues
+        Map<Object, Double> entropies = new LinkedHashMap<>(ftrValues.size());
+        //Populates entropies Map
+        for (Object v : ftrValues) {
+            entropies.put(v, Table.entropy(this.records
+                                               .parallelStream()
+                                               .filter(r -> r.getFeatures()
+                                                             .get(ftrTitle)
+                                                             .getData()
+                                                             .equals(v))));
         }//end for
 
-        return entropy;
+        //The information gain of splitting
+        double infoGain = entropy;
+        //Calculates the information gain
+        for (Map.Entry<Object, Double> e : entropies.entrySet()) {
+            //Subtracts the term of e.getKey() from infoGain
+            infoGain -= ((double) this.ftrValueFreq(ftrTitle, e.getKey()) /
+                    this.records.size()) * e.getValue();
+        }//end for
+
+        return infoGain;
     }
 
 }//end class Table
