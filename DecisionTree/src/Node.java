@@ -141,8 +141,6 @@ public class Node<T> {
             return;
         }//end if
 
-        System.out.println(this.tableSize());
-
         //Populates this.childNodes Map
         for (Map.Entry<Object, Table<T>> e : splitTables.entrySet()) {
             //Adds a new child Node in this Node
