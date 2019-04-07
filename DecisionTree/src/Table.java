@@ -16,8 +16,9 @@ public class Table<T> {
     private List<Record<T>> records;
 
     /**
-     * A Map with keys the title of a Feature and values a Set with the FiniteRange's'
-     * of that Feature column. It is used on the Features with continuous data.
+     * A Map with keys the title of a Feature and values a Set with the
+     * SemiRange's' of that Feature column. It is used on the Features with
+     * continuous data.
      */
     private Map<String, Set<SemiRange<?>>> ranges;
 
