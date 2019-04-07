@@ -62,23 +62,16 @@ public class DecisionTree<T> {
      */
     public @NotNull T predict(@NotNull Record<T> record) {
         //The target Node, to make the prediction
-        Node<T> node;
-        //The value of the examined Feature in node, of record
-        Object value;
-        //The next Node to branch to, based on the value of the given Record
-        //on the Feature examined by node
-        Node<T> nextNode = this.root;
+        Node<T> node = this.root;
         //Follows a path of Nodes, until it reaches a Node that has no mapping
         //for a given value of the examined Feature
-        do {
-            //A new prediction Node has been found
-            node = nextNode;
+        while (node.getFtrTitle() != null) {
             //Gets the value of the examined Feature in node, of record
-            value = record.getFeatures().get(node.getFtrTitle()).getData();
+            Comparable value = record.getFeatures().get(node.getFtrTitle()).getData();
             //The next Node to branch to, based on the value of the given Record
             //on the Feature examined by node
-            nextNode = node.branch(value);
-        } while (nextNode != null);
+            node = node.branch(value);
+        }//end while
 
         return node.dominantTarget();
     }
