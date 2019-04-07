@@ -65,6 +65,22 @@ public class SemiRange<T extends Comparable<T>> extends Range<T> {
     }
 
     @Override
+    public @NotNull String toString() {
+        //The output String representation of this SemiRange.
+        String out;
+        //Checks if the bound of this SemiRange is lower or upper.
+        if (this.isBoundLow) {
+            out = String.format("%c%s, +inf)", this.isBoundInc ? '[' :
+                    '(', this.bound);
+        } else {
+            out = String.format("(-inf, %s%c", this.bound, this.isBoundInc ? ']'
+                    : ')');
+        }//end if
+
+        return out;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
