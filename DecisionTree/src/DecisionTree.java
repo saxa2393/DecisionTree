@@ -1,5 +1,6 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -15,9 +16,10 @@ public class DecisionTree<T> {
     private Node<T> root;
 
     /**
-     * Creates a decision tree on a given List of data. After this constructor
-     * ends, the tree is trained, and ready to receive classification queries.
-     * @param records A List with all the training data, to construct this
+     * Creates a decision tree on a given Collection of data. After this
+     * constructor ends, the tree is trained, and ready to receive
+     * classification queries.
+     * @param records A Collection with all the training data, to construct this
      * DecisionTree. All the given Record's' must have a non-null target value.
      * @param minNodeCapacity The minimum number of Record's' a Node of this
      * DecisionTree can have.
@@ -25,12 +27,12 @@ public class DecisionTree<T> {
      * @throws IllegalArgumentException If minNodeCapacity < 0.
      * @throws IllegalArgumentException If records.size() < minNodeCapacity.
      */
-    public DecisionTree(@NotNull List<Record<T>> records,
+    public DecisionTree(@NotNull Collection<Record<T>> records,
             int minNodeCapacity) {
-        //Validates that records List contains at least 1 element
+        //Validates that records Collection contains at least 1 element
         if (records.isEmpty()) {
-            throw new IllegalArgumentException("Argument records List must " +
-                    "contain at least 1 element.");
+            throw new IllegalArgumentException("Argument records Collection " +
+                    "must contain at least 1 element.");
         }//end if
 
         //Validates that minNodeCapacity >= 0
@@ -41,8 +43,8 @@ public class DecisionTree<T> {
 
         //Validates that records.size() >= minNodeCapacity
         if (records.size() < minNodeCapacity) {
-            throw new IllegalArgumentException("Argument records List must " +
-                    "have a size of at least minNodeCapacity.");
+            throw new IllegalArgumentException("Argument records Collection " +
+                    "must have a size of at least minNodeCapacity.");
         }//end if
 
         //Creates the root Node of this DecisionTree
