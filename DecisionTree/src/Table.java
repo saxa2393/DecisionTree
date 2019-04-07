@@ -123,6 +123,15 @@ public class Table<T> {
     }
 
     /**
+     * Gets the Range's' of the continuous Feature's' of this Table, if any.
+     * @return An unmodifiable Map with the Range's' of the continuous
+     * Feature's' of this Table, if any.
+     */
+    public @NotNull Map<String, Set<SemiRange<?>>> getRanges() {
+        return Collections.unmodifiableMap(this.ranges);
+    }
+
+    /**
      * Gets a Set with all the values of a Feature, in the Record's' of this
      * Table.
      * @param ftrTitle The title of the Feature to retrieve its values.
@@ -130,7 +139,13 @@ public class Table<T> {
      * this Table.
      */
     public @NotNull Set<?> ftrValues(@NotNull String ftrTitle) {
-        //FIXME Supports only discrete values
+        //Gets the Range's' of the given Feature
+        Set<SemiRange<?>> ranges = this.ranges.get(ftrTitle);
+        //Checks if the given Feature contains continuous values
+        if (ranges != null) {
+            return ranges;
+        }//end if
+
         return this.records
                    .parallelStream()
                    .map(r -> r.getFeatures().get(ftrTitle).getData())
@@ -146,8 +161,26 @@ public class Table<T> {
      * this Table. If there are no Record's' with the given value, or the value
      * does not belong in the value set of the given Feature, returns 0.
      */
-    public long ftrValueFreq(@NotNull String ftrTitle, @NotNull Object value) {
-        //FIXME Supports only discrete values
+    public long ftrValueFreq(@NotNull String ftrTitle,
+            @NotNull Comparable value) {
+        //Gets the Range's' of the given Feature
+        Set<SemiRange<?>> ranges = this.ranges.get(ftrTitle);
+        //Checks if the given Feature contains continuous values
+        if (ranges != null) {
+            //A variable to store a reference to the SemiRange containing value
+            SemiRange range = null;
+            //Iterates over ranges to find the one that contains value
+            for (SemiRange r : ranges) {
+                if (r.contains(value)) {
+                    range = r;
+                    break;
+                }//end if
+            }//end for
+
+            return range.isBoundInc() ? (this.records.size() + 2) / 2 :
+                    this.records.size() - (this.records.size() + 2) / 2;
+        }//end if
+
         return this.records
                    .parallelStream()
                    .map(r -> r.getFeatures().get(ftrTitle).getData())
