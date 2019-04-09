@@ -26,7 +26,7 @@ public class DecisionTree<T> {
      * @param minNodeCapacity The minimum number of Record's' a Node of this
      * DecisionTree can have.
      * @throws IllegalArgumentException If records.isEmpty() == true.
-     * @throws IllegalArgumentException If minNodeCapacity < 0.
+     * @throws IllegalArgumentException If minNodeCapacity <= 0.
      * @throws IllegalArgumentException If records.size() < minNodeCapacity.
      */
     public DecisionTree(@NotNull Collection<Record<T>> records,
@@ -37,10 +37,10 @@ public class DecisionTree<T> {
                     "must contain at least 1 element.");
         }//end if
 
-        //Validates that minNodeCapacity >= 0
-        if (minNodeCapacity < 0) {
+        //Validates that minNodeCapacity > 0
+        if (minNodeCapacity <= 0) {
             throw new IllegalArgumentException("Argument minNodeCapacity " +
-                    "must be >= 0.");
+                    "must be > 0.");
         }//end if
 
         //Validates that records.size() >= minNodeCapacity
