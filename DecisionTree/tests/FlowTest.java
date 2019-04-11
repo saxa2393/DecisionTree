@@ -190,12 +190,12 @@ public class FlowTest {
                 Arrays.asList(genAge, genSalary, genSex), output);
     }
 
-    static @NotNull Collection<Record<String>> constructRecords(
+    static <Τ> @NotNull Collection<Record<Τ>> constructRecords(
             @NotNull List<List<? extends Comparable<?>>> data,
             @NotNull List<Feature.Generator> generators,
-            @NotNull List<String> output) {
+            @NotNull List<Τ> output) {
         final int RECORDS_NUM = data.get(0).size();
-        Collection<Record<String>> records = new ArrayList<>(RECORDS_NUM);
+        Collection<Record<Τ>> records = new ArrayList<>(RECORDS_NUM);
         for (int i = 0; i < RECORDS_NUM; ++i) {
             List<Feature<?>> features = new ArrayList<>(data.size());
             for (int j = 0; j < data.size(); ++j) {
