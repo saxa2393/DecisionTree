@@ -1,7 +1,9 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Contains test, for the proper execution of the DecisionTree.
@@ -9,7 +11,7 @@ import java.util.Collection;
 public class FlowTest {
 
     public static void main(String[] args) {
-        DecisionTree<String> dt = new DecisionTree<>(FlowTest.generateRecords(),
+        DecisionTree<String> dt = new DecisionTree<>(FlowTest.constructRecords(),
                 1);
 
         final String AGE = "age";
@@ -17,7 +19,7 @@ public class FlowTest {
         final String SEX = "sex";
 
         Feature<Integer> f1 = new Feature<>(AGE, 30, Feature.Type.CONTINUOUS);
-        Feature<Integer> f2 = new Feature<>(SALARY, 40_816, Feature.Type.CONTINUOUS);
+        Feature<Integer> f2 = new Feature<>(SALARY, 50_816, Feature.Type.CONTINUOUS);
         Feature<String> f3 = new Feature<>(SEX, "female", Feature.Type.DISCRETE);
         Record<String> r1 = new Record<>(Arrays.asList(f1, f2, f3), null);
 
@@ -135,10 +137,10 @@ public class FlowTest {
         f3 = genSex.generate("male");
         Record<String> r6 = new Record<>(Arrays.asList(f1, f2, f3), TRG_BAD);
 
-        f1 = genAge.generate(62);
-        f2 = genSalary.generate(35_000);
+        f1 = genAge.generate(23);
+        f2 = genSalary.generate(74_154);
         f3 = genSex.generate("male");
-        Record<String> r7 = new Record<>(Arrays.asList(f1, f2, f3), TRG_BAD);
+        Record<String> r7 = new Record<>(Arrays.asList(f1, f2, f3), TRG_GOOD);
 
         f1 = genAge.generate(56);
         f2 = genSalary.generate(120_000);
@@ -156,6 +158,54 @@ public class FlowTest {
         Record<String> r10 = new Record<>(Arrays.asList(f1, f2, f3), TRG_GOOD);
 
         return Arrays.asList(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10);
+    }
+
+    /**
+     * Creates test Record's' for the DecisionTree, using constructRecords(...).
+     * @return Test Record's' for the DecisionTree, using using
+     * constructRecords(...).
+     */
+    static @NotNull Collection<Record<String>> constructRecords() {
+        final String AGE = "age";
+        final String SALARY = "salary";
+        final String SEX = "sex";
+
+        final String TRG_GOOD = "good";
+        final String TRG_BAD = "bad";
+
+        Feature.Generator<Integer> genAge = new Feature.Generator<>(AGE, Feature.Type.CONTINUOUS);
+        Feature.Generator<Integer> genSalary = new Feature.Generator<>(SALARY, Feature.Type.CONTINUOUS);
+        Feature.Generator<String> genSex = new Feature.Generator<>(SEX, Feature.Type.DISCRETE);
+
+        List<Integer> age = Arrays.asList(25, 51, 42, 36, 21, 62, 23, 56, 34, 28);
+        List<Integer> salary = Arrays.asList(50_000, 45_816, 75_491, 15_034,
+                65_500, 35_000, 74_154, 120_000, 25_150, 165_000);
+        List<String> sex = Arrays.asList("female", "male", "male", "female",
+                "female", "male", "male", "female", "male", "male");
+        List<String> output = Arrays.asList(TRG_GOOD, TRG_BAD, TRG_GOOD,
+                TRG_BAD, TRG_GOOD, TRG_BAD, TRG_GOOD, TRG_GOOD, TRG_BAD,
+                TRG_GOOD);
+
+        return FlowTest.constructRecords(Arrays.asList(age, salary, sex),
+                Arrays.asList(genAge, genSalary, genSex), output);
+    }
+
+    static @NotNull Collection<Record<String>> constructRecords(
+            @NotNull List<List<? extends Comparable<?>>> data,
+            @NotNull List<Feature.Generator> generators,
+            @NotNull List<String> output) {
+        final int RECORDS_NUM = data.get(0).size();
+        Collection<Record<String>> records = new ArrayList<>(RECORDS_NUM);
+        for (int i = 0; i < RECORDS_NUM; ++i) {
+            List<Feature<?>> features = new ArrayList<>(data.size());
+            for (int j = 0; j < data.size(); ++j) {
+                features.add(generators.get(j).generate(data.get(j).get(i)));
+            }//end for
+
+            records.add(new Record<>(features, output.get(i)));
+        }//end for
+
+        return records;
     }
 
 }//end class FlowTest
