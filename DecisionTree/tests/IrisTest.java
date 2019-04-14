@@ -3,10 +3,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class IrisTest {
 
@@ -29,6 +28,9 @@ public class IrisTest {
 
         //A List with all the String tokens of the header of the records.
         List<String> header = IrisTest.tokenize(lines.get(0));
+        //Hides the first element of header List, which is the number of records
+        //the .csv file has, as it is no longer needed
+        header = header.subList(1, header.size());
         //A List with only the records in tokenized form, without the header
         List<List<String>> strRecords = IrisTest.strRecords(lines.subList(1,
                 lines.size()));
@@ -117,10 +119,10 @@ public class IrisTest {
     }
 
     /**
-     * Randomly selects a percentage from a List of records, to form a List in
+     * Arbitrary selects a percentage from a List of records, to form a List in
      * the same form, that contains the training records. The selection must not
      * be entirely random, in order to prevent extinction of any target value.
-     * To prevent that case, this method randomly selects a percentage of every
+     * To prevent that case, this method arbitrary selects a percentage of every
      * target value, for the training set.
      * @param records A List with all the records, in a tokenized form, i.e. a
      * List of String tokens. This List must not contain the header of the .csv
@@ -130,7 +132,38 @@ public class IrisTest {
      */
     private static @NotNull List<List<String>> trainRecords(
             @NotNull List<List<String>> records) {
-        throw new UnsupportedOperationException();
+        //The percentage of the training records
+        final double PERCENTAGE = 0.75;
+        //The number of training records
+        int size = (int) Math.round(PERCENTAGE * records.size());
+        //A List with the training records
+        List<List<String>> trainRecords = new ArrayList<>(size);
+
+        //A Map with the target values as keys and the a List with all the
+        //records they belong to
+        Map<String, List<List<String>>> targets = new HashMap<>();
+        //Iterates records List
+        for (List<String> r : records) {
+            //The target value of record r
+            String key = r.get(r.size() - 1);
+            //Gets the List with all the records, of the target of record r
+            List<List<String>> targetRecords = targets.computeIfAbsent(key,
+                    k -> new ArrayList<>());
+            //Adds record r in targetRecords List
+            targetRecords.add(r);
+        }//end for
+
+        //Populates trainRecords List
+        for (Map.Entry<String, List<List<String>>> e : targets.entrySet()) {
+            //Shuffles the records of the current target value
+            Collections.shuffle(e.getValue());
+            //Adds a percentage of the records of the current target value, in
+            //trainRecords List
+            trainRecords.addAll(e.getValue().subList(0, (int)
+                    Math.round(PERCENTAGE * e.getValue().size())));
+        }//end for
+
+        return trainRecords;
     }
 
     /**
@@ -147,7 +180,14 @@ public class IrisTest {
     private static @NotNull List<List<String>> evaluationRecords(
             @NotNull List<List<String>> records,
             @NotNull List<List<String>> trainRecords) {
-        throw new UnsupportedOperationException();
+        //A Set from records List with all the evaluation records
+        Set<List<String>> evalRecordsSet = new HashSet<>(records);
+        //A Set from trainRecords List with all the training records
+        Set<List<String>> trainRecordsSet = new HashSet<>(trainRecords);
+        //Removes all the trainRecords from evalRecordsSet
+        evalRecordsSet.removeAll(trainRecordsSet);
+
+        return new ArrayList<>(evalRecordsSet);
     }
 
     /**
@@ -181,7 +221,42 @@ public class IrisTest {
     private static @NotNull Collection<Record<String>> constructRecords(
             @NotNull List<String> header,
             @NotNull List<List<String>> strRecords) {
-        throw new UnsupportedOperationException();
+        //A Feature.Generator for the 1st Feature
+        Feature.Generator<Double> gen1 = IrisTest.getGenerator(header.get(0));
+        //A Feature.Generator for the 2nd Feature
+        Feature.Generator<Double> gen2 = IrisTest.getGenerator(header.get(1));
+        //A Feature.Generator for the 3rd Feature
+        Feature.Generator<Double> gen3 = IrisTest.getGenerator(header.get(2));
+        //A Feature.Generator for the 4th Feature
+        Feature.Generator<Double> gen4 = IrisTest.getGenerator(header.get(3));
+
+        //A List with all the data of the 1st column, in String format
+        List<String> column1 = IrisTest.columnRecords(strRecords, 0);
+        //Converts column1 in Double form
+        List<Double> inData1 = IrisTest.toDouble(column1);
+
+        //A List with all the data of the 2nd column, in String format
+        List<String> column2 = IrisTest.columnRecords(strRecords, 1);
+        //Converts column2 in Double form
+        List<Double> inData2 = IrisTest.toDouble(column2);
+
+        //A List with all the data of the 3rd column, in String format
+        List<String> column3 = IrisTest.columnRecords(strRecords, 2);
+        //Converts column3 in Double form
+        List<Double> inData3 = IrisTest.toDouble(column3);
+
+        //A List with all the data of the 4th column, in String format
+        List<String> column4 = IrisTest.columnRecords(strRecords, 3);
+        //Converts column1 in Double form
+        List<Double> inData4 = IrisTest.toDouble(column4);
+
+        //A List with all the data of the output column
+        List<String> outData = IrisTest.columnRecords(strRecords, header.size()
+                - 1);
+
+        return IrisTest.constructRecords(Arrays.asList(inData1, inData2,
+                inData3, inData4), Arrays.asList(gen1, gen2, gen3, gen4),
+                outData);
     }
 
     /**
