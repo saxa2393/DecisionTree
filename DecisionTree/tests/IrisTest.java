@@ -60,7 +60,14 @@ public class IrisTest {
      * @return A List with all the tokens of the splitting.
      */
     private static @NotNull List<String> tokenize(@NotNull String str) {
-        throw new UnsupportedOperationException();
+        String[] tokens;
+        List<String> listOfTokens = new ArrayList<String> ();
+
+        tokens = str.split(",");
+        for (int i = 0; i < tokens.length; i++)
+            listOfTokens.add(tokens[i]);
+
+        return listOfTokens;
     }
 
     /**
@@ -75,7 +82,19 @@ public class IrisTest {
      */
     private static <T extends Comparable<T>> Feature.@NotNull Generator<T>
             getGenerator(@NotNull String tab) {
-        throw new UnsupportedOperationException();
+        int type;
+        String[] tokens;
+
+        tokens = tab.split(":");
+        type = Integer.parseInt(tokens[1]);
+
+        if (type == 0)
+            return new Feature.Generator<> (tokens[0], Feature.Type.DISCRETE);
+        else if (type == 1)
+            return new Feature.Generator<> (tokens[0], Feature.Type.CONTINUOUS);
+        else
+            throw new IllegalArgumentException("The type of the given tab " +
+                    "must be either 0 for discrete or 1 for continuous.");
     }
 
     /**
@@ -87,7 +106,14 @@ public class IrisTest {
      */
     private static @NotNull List<List<String>> strRecords(
             @NotNull List<String> lines) {
-        throw new UnsupportedOperationException();
+        List<List<String>> list = new ArrayList<List<String>>();
+
+        for (String l : lines) {
+            List<String> tokens = tokenize(l);
+            list.add(tokens);
+        }
+
+        return list;
     }
 
     /**
