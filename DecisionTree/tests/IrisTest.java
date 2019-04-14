@@ -1,6 +1,18 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class IrisTest {
+
+    /**
+     * Tokenizes a String, by splitting it at ',' and returns a List with all
+     * the tokens.
+     * @param str A String to tokenize at ','.
+     * @return A List with all the tokens of the splitting.
+     */
+    private static @NotNull List<String> tokenize(@NotNull String str) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Creates a Feature.Generator, for a given tab in the data. The tab must be
