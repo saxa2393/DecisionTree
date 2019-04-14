@@ -48,8 +48,10 @@ public class IrisTest {
      * The output List contains all the records, but only their values at the
      * column/Feature described by the given index, that applies in the input
      * List.
-     * @param strRecords A List with all the lines of the file, in a tokenized
-     * form, i.e. a List of String tokens.
+     * @param strRecords A List with all the records, in a tokenized form, i.e.
+     * a List of String tokens. This List must not contain the header of the
+     * .csv file, it must contain only the records, all with tokenized String
+     * values. The List at the last index must contain the target values.
      * @param index The index of the column, in strRecords List.
      * @return A List that contains all the values of the column described by
      * index, in String form.
@@ -70,11 +72,28 @@ public class IrisTest {
     }
 
     /**
+     * Randomly selects a percentage from a List of records, to form a List in
+     * the same form, that contains the training records. The selection must not
+     * be entirely random, in order to prevent extinction of any target value.
+     * To prevent that case, this method randomly selects a percentage of every
+     * target value, for the training set.
+     * @param records A List with all the records, in a tokenized form, i.e. a
+     * List of String tokens. This List must not contain the header of the .csv
+     * file, it must contain only the records, all with tokenized String values.
+     * The List at the last index must contain the target values.
+     * @return The input List, filtered to contain only the training records.
+     */
+    private static @NotNull List<List<String>> trainRecords(
+            @NotNull List<List<String>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Creates Record's' for the DecisionTree, for training.
      * @param strRecords A List with all the records, in a tokenized form, i.e.
      * a List of String tokens. This List must not contain the header of the
      * .csv file, it must contain only the records, all with tokenized String
-     * values.
+     * values. The List at the last index must contain the target values.
      * @return A Collection of Record's' with target variable of String,
      * constructed from the given records in strRecords.
      */
