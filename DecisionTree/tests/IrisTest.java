@@ -30,10 +30,8 @@ public class IrisTest {
         //A List with all the String tokens of the header of the records.
         List<String> header = IrisTest.tokenize(lines.get(0));
         //A List with only the records in tokenized form, without the header
-        List<List<String>> strRecords = lines.subList(1, lines.size())
-                                             .parallelStream()
-                                             .map(IrisTest::tokenize)
-                                             .collect(Collectors.toList());
+        List<List<String>> strRecords = IrisTest.strRecords(lines.subList(1,
+                lines.size()));
 
         //A List with all the training records
         List<List<String>> trainStrRecords = IrisTest.trainRecords(strRecords);
