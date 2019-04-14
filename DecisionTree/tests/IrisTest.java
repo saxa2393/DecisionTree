@@ -1,10 +1,57 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class IrisTest {
+
+    public static void main(String[] args) {
+        //A List with all the lines of the .csv file as String's'
+        List<String> lines = null;
+        //Tries to read the lines of the file in lines List
+        try {
+            lines = Files.readAllLines(Paths.get(args[0]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }//end try
+
+        //Validates that lines List contains at least 2 lines, its header, and
+        //at least 1 record
+        if (lines.size() < 2) {
+            throw new IllegalArgumentException("Argument args[0] must " +
+                    "contain a file with at least 2 lines.");
+        }//end if
+
+        //A List with all the String tokens of the header of the records.
+        List<String> header = IrisTest.tokenize(lines.get(0));
+        //A List with only the records in tokenized form, without the header
+        List<List<String>> strRecords = lines.subList(1, lines.size())
+                                             .parallelStream()
+                                             .map(IrisTest::tokenize)
+                                             .collect(Collectors.toList());
+
+        //A List with all the training records
+        List<List<String>> trainStrRecords = IrisTest.trainRecords(strRecords);
+        //A Collection of Record's', form trainStrRecords
+        Collection<Record<String>> trainRecords =
+                IrisTest.constructRecords(header, trainStrRecords);
+        //Creates a DecisionTree with the training records
+        DecisionTree<String> dt = new DecisionTree<>(trainRecords, 1);
+
+        //A List with all the evaluation records
+        List<List<String>> evalStrRecords =
+                IrisTest.evaluationRecords(strRecords, trainStrRecords);
+        //A Collection of Record's', form evalStrRecords
+        Collection<Record<String>> evalRecords =
+                IrisTest.constructRecords(header, evalStrRecords);
+        //Prints the success prediction rate of DecisionTree dt
+        System.out.println(IrisTest.successRate(dt, evalRecords));
+    }
 
     /**
      * Tokenizes a String, by splitting it at ',' and returns a List with all
@@ -124,6 +171,8 @@ public class IrisTest {
 
     /**
      * Creates Record's' for the DecisionTree, for training.
+     * @param header A List with all the String tokens of the header of the
+     * records.
      * @param strRecords A List with all the records, in a tokenized form, i.e.
      * a List of String tokens. This List must not contain the header of the
      * .csv file, it must contain only the records, all with tokenized String
@@ -132,6 +181,7 @@ public class IrisTest {
      * constructed from the given records in strRecords.
      */
     private static @NotNull Collection<Record<String>> constructRecords(
+            @NotNull List<String> header,
             @NotNull List<List<String>> strRecords) {
         throw new UnsupportedOperationException();
     }
