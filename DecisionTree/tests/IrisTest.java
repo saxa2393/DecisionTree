@@ -29,4 +29,16 @@ public class IrisTest {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Creates a List with all the lines of the file, in a tokenized form, i.e.
+     * a List of String tokens.
+     * @param lines A List with all the lines of the file in String's'.
+     * @return A List with all the lines of the file, in a tokenized form, i.e.
+     * a List of String tokens.
+     */
+    private static @NotNull List<List<String>> strRecords(
+            @NotNull List<String> lines) {
+        throw new UnsupportedOperationException();
+    }
+
 }//end class IrisTest
