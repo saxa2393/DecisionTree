@@ -41,4 +41,20 @@ public class IrisTest {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Creates a List that contains all the values of a column in String form.
+     * The output List contains all the records, but only their values at the
+     * column/Feature described by the given index, that applies in the input
+     * List.
+     * @param strRecords A List with all the lines of the file, in a tokenized
+     * form, i.e. a List of String tokens.
+     * @param index The index of the column, in strRecords List.
+     * @return A List that contains all the values of the column described by
+     * index, in String form.
+     */
+    private static @NotNull List<String> columnRecords(
+            @NotNull List<List<String>> strRecords, int index) {
+        throw new UnsupportedOperationException();
+    }
+
 }//end class IrisTest
