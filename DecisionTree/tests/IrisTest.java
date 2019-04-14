@@ -57,4 +57,14 @@ public class IrisTest {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Creates a new List of Double, out of a List of String, given that the
+     * String's' actually represent Double's' and can be parsed.
+     * @param list A List of String values, that represent Double's'.
+     * @return A List with the values of the input List, in Double form.
+     */
+    private static @NotNull List<Double> toDouble(@NotNull List<String> list) {
+        throw new UnsupportedOperationException();
+    }
+
 }//end class IrisTest
