@@ -89,6 +89,23 @@ public class IrisTest {
     }
 
     /**
+     * Takes 2 List's' of records, and returns their difference.
+     * @param records A List with all the records, in a tokenized form, i.e. a
+     * List of String tokens. This List must not contain the header of the .csv
+     * file, it must contain only the records, all with tokenized String values.
+     * The List at the last index must contain the target values.
+     * @param trainRecords A List that is a subset of records List, and contains
+     * only the training records.
+     * @return A List containing all the records that exist in records List, but
+     * don't exist in trainRecords List, i.e. the evaluation records.
+     */
+    private static @NotNull List<List<String>> evaluationRecords(
+            @NotNull List<List<String>> records,
+            @NotNull List<List<String>> trainRecords) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Creates Record's' for the DecisionTree, for training.
      * @param strRecords A List with all the records, in a tokenized form, i.e.
      * a List of String tokens. This List must not contain the header of the
