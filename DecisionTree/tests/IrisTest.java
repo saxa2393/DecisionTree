@@ -1,5 +1,7 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class IrisTest {
@@ -65,6 +67,50 @@ public class IrisTest {
      */
     private static @NotNull List<Double> toDouble(@NotNull List<String> list) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates Record's' for the DecisionTree, for training.
+     * @param strRecords A List with all the records, in a tokenized form, i.e.
+     * a List of String tokens. This List must not contain the header of the
+     * .csv file, it must contain only the records, all with tokenized String
+     * values.
+     * @return A Collection of Record's' with target variable of String,
+     * constructed from the given records in strRecords.
+     */
+    private static @NotNull Collection<Record<String>> constructRecords(
+            @NotNull List<List<String>> strRecords) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates a Collection of Record's', given all the data of the columns,
+     * Feature.Generator's', and a List with all the output values, of the
+     * records.
+     * @param data A List of columns, with each column containing the values of
+     * all the records, for that column.
+     * @param generators A List with all Feature.Generator's' to create the
+     * Feature's' of the Record's'.
+     * @param output A List with all the output values of the records.
+     * @param <Τ> The type of the output variable.
+     * @return A Collection with all the Record's', to train a DecisionTree.
+     */
+    private static <Τ> @NotNull Collection<Record<Τ>> constructRecords(
+            @NotNull List<List<? extends Comparable<?>>> data,
+            @NotNull List<Feature.Generator> generators,
+            @NotNull List<Τ> output) {
+        final int RECORDS_NUM = data.get(0).size();
+        Collection<Record<Τ>> records = new ArrayList<>(RECORDS_NUM);
+        for (int i = 0; i < RECORDS_NUM; ++i) {
+            List<Feature<?>> features = new ArrayList<>(data.size());
+            for (int j = 0; j < data.size(); ++j) {
+                features.add(generators.get(j).generate(data.get(j).get(i)));
+            }//end for
+
+            records.add(new Record<>(features, output.get(i)));
+        }//end for
+
+        return records;
     }
 
 }//end class IrisTest
