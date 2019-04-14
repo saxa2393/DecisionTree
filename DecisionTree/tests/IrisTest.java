@@ -106,6 +106,23 @@ public class IrisTest {
     }
 
     /**
+     * Calculates the percentage of the given Record's' that were successfully
+     * classified by the given DecisionTree.
+     * @param dt A DecisionTree to classify the given Record's'.
+     * @param records A Collection of Record's' to be classified by the given
+     * DecisionTree. They must contain their target values.
+     * @return A value in range [0.0, 1.0] describing the percentage of the
+     * given Record's' that were successfully classified, by the given
+     * DecisionTree. A value of 0.0 means total failure to correctly classify
+     * even a single Record, while a value of 1.0 means that all the Record's'
+     * were correctly classified.
+     */
+    private static double successRate(@NotNull DecisionTree dt,
+            @NotNull Collection<Record<String>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Creates Record's' for the DecisionTree, for training.
      * @param strRecords A List with all the records, in a tokenized form, i.e.
      * a List of String tokens. This List must not contain the header of the
