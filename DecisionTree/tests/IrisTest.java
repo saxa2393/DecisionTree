@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class IrisTest {
 
@@ -228,7 +226,7 @@ public class IrisTest {
      * even a single Record, while a value of 1.0 means that all the Record's'
      * were correctly classified.
      */
-    private static double successRate(@NotNull DecisionTree dt,
+    private static double successRate(@NotNull DecisionTree<String> dt,
             @NotNull Collection<Record<String>> records) {
         throw new UnsupportedOperationException();
     }
