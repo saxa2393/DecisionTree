@@ -139,7 +139,12 @@ public class IrisTest {
      * @return A List with the values of the input List, in Double form.
      */
     private static @NotNull List<Double> toDouble(@NotNull List<String> list) {
-        throw new UnsupportedOperationException();
+        List<Double> ListOfDoubleArr = (List<Double>) new ArrayList<Double[]>();
+        for (Iterator<String[]> it = (Iterator<String[]>) list.iterator(); it.hasNext();) {
+            ListOfDoubleArr.add(Double.parseDouble(String.valueOf(it)));
+        }//end for loop which iterates over List<String[]>
+
+        return ListOfDoubleArr;
     }
 
     /**
