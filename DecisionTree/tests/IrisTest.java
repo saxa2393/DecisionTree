@@ -127,9 +127,14 @@ public class IrisTest {
      * @return A List that contains all the values of the column described by
      * index, in String form.
      */
-    private static @NotNull List<String> columnRecords(
-            @NotNull List<List<String>> strRecords, int index) {
-        throw new UnsupportedOperationException();
+    private static @NotNull List<String> columnRecords(@NotNull List<List<String>> strRecords, int index) {
+        List<String> ListOfString = (List<String>) new ArrayList<String>();
+        String col;
+        for (int i = 0; i < strRecords.size(); i++) {
+            col = ListOfString.get(index);
+            ListOfString.add(col);
+        }
+        return ListOfString;
     }
 
     /**
@@ -139,7 +144,11 @@ public class IrisTest {
      * @return A List with the values of the input List, in Double form.
      */
     private static @NotNull List<Double> toDouble(@NotNull List<String> list) {
-        throw new UnsupportedOperationException();
+        List<Double> ListOfDoubleArr = (List<Double>) new ArrayList<Double>();
+        for (Iterator<String> it = (Iterator<String>) list.iterator(); it.hasNext();) {
+            ListOfDoubleArr.add(Double.parseDouble(String.valueOf(it)));
+        }//end for loop which iterates over List<String>
+        return ListOfDoubleArr;
     }
 
     /**
